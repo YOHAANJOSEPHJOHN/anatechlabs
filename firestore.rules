@@ -1,0 +1,71 @@
+/**
+ * @file Firestore Security Rules for AnaTech Website Forms
+ * @core_philosophy This ruleset allows unauthenticated users to create documents in specific collections,
+ *  mirroring a public-submission form scenario. No update or delete operations are permitted through the
+ *  ruleset, as these actions should be managed via backend systems. Read access is public for all collections.
+ * @data_structure All data is stored in flat collections at the root level of the Firestore database:
+ *  /contact_inquiries/{contactInquiryId}
+ *  /job_applications/{jobApplicationId}
+ *  /workshop_requests/{workshopRequestId}
+ *  /notification_subscribers/{userId}
+ * @key_security_decisions Unauthenticated access is permitted for `create` operations ONLY on form submission collections.
+ *  The `notification_subscribers` collection allows authenticated users to read and write their own document.
+ *  Update and Delete operations are disabled on public forms to prevent unauthorized data modification. No schema validation is enforced.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Rules for the contact_inquiries collection, allowing anyone to submit a contact inquiry.
+     * @path /contact_inquiries/{contactInquiryId}
+     * @allow (create) Anyone can create a document in this collection to submit a contact inquiry.
+     * @deny (update, delete) No one can update or delete a document in this collection through the rules.
+     * @allow (get, list) Public read access is allowed.
+     * @principle Allows unauthenticated creation of contact inquiries.
+     */
+    match /contact_inquiries/{contactInquiryId} {
+      allow get, list: if true;
+      allow create: if true;
+      allow update, delete: if false;
+    }
+
+    /**
+     * @description Rules for the job_applications collection, allowing anyone to submit a job application.
+     * @path /job_applications/{jobApplicationId}
+     * @allow (create) Anyone can create a document in this collection to submit a job application.
+     * @deny (update, delete) No one can update or delete a document in this collection through the rules.
+     * @allow (get, list) Public read access is allowed.
+     * @principle Allows unauthenticated creation of job applications.
+     */
+    match /job_applications/{jobApplicationId} {
+      allow get, list: if true;
+      allow create: if true;
+      allow update, delete: if false;
+    }
+
+    /**
+     * @description Rules for the workshop_requests collection, allowing anyone to submit a workshop request.
+     * @path /workshop_requests/{workshopRequestId}
+     * @allow (create) Anyone can create a document in this collection to submit a workshop request.
+     * @deny (update, delete) No one can update or delete a document in this collection through the rules.
+     * @allow (get, list) Public read access is allowed.
+     * @principle Allows unauthenticated creation of workshop requests.
+     */
+    match /workshop_requests/{workshopRequestId} {
+      allow get, list: if true;
+      allow create: if true;
+      allow update, delete: if false;
+    }
+
+    /**
+     * @description Rules for the notification_subscribers collection, allowing users to manage their own preferences.
+     * @path /notification_subscribers/{userId}
+     * @allow (read, write) Authenticated users can read and write to their own document.
+     * @principle Enforces user-specific data ownership for notification settings.
+     */
+    match /notification_subscribers/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
