@@ -1,4 +1,3 @@
-
 /**
  * @file This file defines the API route for updating an SSP order's status.
  * @summary It handles POST requests to change a status, validates user session, logs the change to an audit trail table, and triggers a customer email on completion.
@@ -32,7 +31,7 @@ export async function POST(request: Request) {
         await connection.beginTransaction();
 
         // 1. Get the current status
-        const [currentOrderResult] = await connection.query('SELECT status, customer_email, customer_name, created_at FROM ssp_orders WHERE id = ?', [orderId]);
+        const [currentOrderResult] = await connection.query('SELECT status, customer_email, customer_name FROM ssp_orders WHERE id = ?', [orderId]);
         const currentOrder = (currentOrderResult as any)?.[0];
         
         if (!currentOrder) {
@@ -81,5 +80,3 @@ export async function POST(request: Request) {
         connection.release();
     }
 }
-
-    
