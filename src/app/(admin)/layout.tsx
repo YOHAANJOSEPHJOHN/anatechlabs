@@ -1,5 +1,6 @@
 
 import { SidebarProvider, Sidebar, SidebarInset, SidebarTrigger, SidebarHeader, SidebarContent, SidebarGroup, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
+import { getSession } from '@/lib/session';
 import {
   LayoutDashboard,
   Users,
@@ -25,9 +26,11 @@ import {
   Settings,
 } from 'lucide-react';
 import Link from 'next/link';
+import { deleteSession } from '@/lib/session';
 import { redirect } from 'next/navigation';
 
 async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const session = await getSession();
   
   const navItems = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -123,18 +126,21 @@ async function AdminLayout({ children }: { children: React.ReactNode }) {
                 <SidebarTrigger />
                 <span className="font-semibold hidden sm:inline">AnaTech Labs – Admin Dashboard</span>
               </div>
-              <div className="flex items-center gap-4">
-                  <span className="text-sm text-muted-foreground">Welcome, Admin</span>
-                  <form action={async () => {
-                    'use server';
-                    redirect('/api/auth/logout');
-                  }}>
-                      <button type="submit" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-                          <LogOut className="h-4 w-4" />
-                          <span className="hidden sm:inline">Logout</span>
-                      </button>
-                  </form>
-              </div>
+              {session && (
+                <div className="flex items-center gap-4">
+                    <span className="text-sm text-muted-foreground">{session?.email}</span>
+                    <form action={async () => {
+                      'use server';
+                      await deleteSession();
+                      redirect('/login');
+                    }}>
+                        <button type="submit" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+                            <LogOut className="h-4 w-4" />
+                            <span className="hidden sm:inline">Logout</span>
+                        </button>
+                    </form>
+                </div>
+              )}
           </header>
           <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
         </div>

@@ -52,9 +52,10 @@ import {
   Wrench,
   FileText,
 } from 'lucide-react';
+import { LabIcon } from '../icons';
 import { SettingsPanel } from './settings-panel';
 import { useState } from 'react';
-import { useAIState } from '@/lib/ai/context';
+import { AIStateProvider, useAIState } from '@/lib/ai/context';
 import { FloatingSearchBar } from '../ai/floating-search-bar';
 import Image from 'next/image';
 
@@ -173,7 +174,11 @@ function HeaderContent() {
 }
 
 export function Header() {
-    return <HeaderContent />;
+  return (
+    <AIStateProvider>
+      <HeaderContent />
+    </AIStateProvider>
+  )
 }
 
 function DesktopNav({pathname}: {pathname: string}) {
@@ -300,5 +305,3 @@ const ListItem = React.forwardRef<
   );
 });
 ListItem.displayName = 'ListItem';
-
-    
